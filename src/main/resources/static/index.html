@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Resume & Job Application Tracker</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1 { color: #333; text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { background-color: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #007bff; color: white; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Job Application Tracker</h1>
+
+    <!-- Add Job Form -->
+    <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+        <h3>Add New Job Application</h3>
+        <form id="jobForm">
+            <div class="form-group">
+                <label>Company Name:</label>
+                <input type="text" id="companyName" required>
+            </div>
+            <div class="form-group">
+                <label>Job Title:</label>
+                <input type="text" id="jobTitle" required>
+            </div>
+            <div class="form-group">
+                <label>Status:</label>
+                <select id="status">
+                    <option value="APPLIED">APPLIED</option>
+                    <option value="INTERVIEWING">INTERVIEWING</option>
+                    <option value="OFFERED">OFFERED</option>
+                    <option value="REJECTED">REJECTED</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Applied Date (YYYY-MM-DD):</label>
+                <input type="text" id="appliedDate" placeholder="2026-10-09" required>
+            </div>
+            <button type="submit">Save Application</button>
+        </form>
+    </div>
+
+    <!-- Job List Table -->
+    <h3>Applications List</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Company</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Applied Date</th>
+            </tr>
+        </thead>
+        <tbody id="jobTableBody">
+            <!-- Data will load here dynamically -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    const apiUrl = '/api/jobs';
+
+    // Fetch and display jobs
+    async function loadJobs() {
+        try {
+            const response = await fetch(apiUrl);
+            const jobs = await response.json();
+            const tbody = document.getElementById('jobTableBody');
+            tbody.innerHTML = '';
+            jobs.forEach(job => {
+                const row = `<tr>
+                    <td>${job.id}</td>
+                    <td>${job.companyName}</td>
+                    <td>${job.jobTitle}</td>
+                    <td>${job.status}</td>
+                    <td>${job.appliedDate || ''}</td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        } catch (error) {
+            console.error('Error loading jobs:', error);
+        }
+    }
+
+    // Handle form submission
+    document.getElementById('jobForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const newJob = {
+            companyName: document.getElementById('companyName').value,
+            jobTitle: document.getElementById('jobTitle').value,
+            status: document.getElementById('status').value,
+            appliedDate: document.getElementById('appliedDate').value
+        };
+
+        await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newJob)
+        });
+
+        document.getElementById('jobForm').reset();
+        loadJobs();
+    });
+
+    // Initial load
+    loadJobs();
+</script>
+
+</body>
+</html>
